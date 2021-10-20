@@ -3,53 +3,44 @@ pragma solidity ^0.8.7;
 
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
-contract RandomNumberConsumer is VRFConsumerBase {
+contract coinflip is VRFConsumerBase {
     
     bytes32 internal keyHash;
     uint256 internal fee;
-    
+    address payable owner;
     uint256 public randomResult;
+    uint public bet;
+    address payable public player;
+    event Roll(address indexed, uint indexed, bool indexed);
+    event Deposit(address indexed, uint indexed);
+    event Withdraw(address indexed, uint indexed);
     
-    /**
-     * Constructor inherits VRFConsumerBase
-     * 
-     * Network: Kovan
-     * Chainlink VRF Coordinator address: 0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9
-     * LINK token address:                0xa36085F69e2889c224210F603D836748e7dC0088
-     * Key Hash: 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4
-     */
     constructor() 
         VRFConsumerBase(
-            0xdD3782915140c8f3b190B5D67eAc6dc5760C46E9, // VRF Coordinator
-            0xa36085F69e2889c224210F603D836748e7dC0088  // LINK Token
+            0x3d2341ADb2D31f1c5530cDC622016af293177AE0, // VRF Coordinator
+            0xb0897686c545045aFc77CF20eC7A532E3120E0F1  // LINK Token
         )
-    {
-        keyHash = 0x6c3699283bda56ad74f6b855546325b68d482e983852a7a82979cc4807b641f4;
-        fee = 0.1 * 10 ** 18; // 0.1 LINK (Varies by network)
-    }
     
-    function getRandomNumber() public returns (bytes32 requestId) {
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK - fill contract with faucet");
-        return requestRandomness(keyHash, fee);
+    {
+        keyHash = 0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da;
+        fee = 0.0001 * 10 ** 18; // 0.1 LINK (Varies by network)
+        owner = payable(msg.sender);
     }
 
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
         randomResult = (randomness % 100) + 1;
+        require(randomResult <= 100 && randomResult >= 1);
+        if (randomResult > 50) {
+            player.transfer(bet);
+            player.transfer(bet);
+            emit Roll(player, bet, true);
+        }
+        else {
+            emit Roll(player, bet, false);
+        }
+        
     }
-}
 
-contract coinflip {
-    uint rollNumber = 67;
-    uint bet;
-    address payable winner;
-    address payable owner;
-    event Roll(address indexed, uint, bool);
-    event Deposit(address indexed, uint);
-    event Withdraw(address indexed, uint);
-    
-    constructor() {
-        owner = payable(msg.sender);
-    }
     
     function deposit() public payable {
         emit Deposit(msg.sender, msg.value);
@@ -62,18 +53,12 @@ contract coinflip {
         emit Withdraw(msg.sender, amount);
     }
 
-    function roll() public payable {
-        winner = payable(msg.sender);
+    function roll() public payable returns(bytes32 requestId) {
+        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK");
+        player = payable(msg.sender);
         bet = msg.value;
-        require(rollNumber <= 100 && rollNumber >= 1);
-        if (rollNumber > 50) {
-            winner.transfer(bet);
-            winner.transfer(bet);
-            emit Roll(winner, bet, true);
-        }
-        else {
-            emit Roll(winner, bet, false);
-        }
+        requestId = requestRandomness(keyHash, fee);
+        return requestId;
     }
 }
 

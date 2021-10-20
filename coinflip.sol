@@ -10,6 +10,7 @@ contract coinflip is VRFConsumerBase {
     address payable owner;
     uint256 public randomResult;
     uint public bet;
+    uint public minimumBet = 1000000000000000;
     address payable public player;
     event Roll(address indexed, uint indexed, bool indexed);
     event Deposit(address indexed, uint indexed);
@@ -26,21 +27,6 @@ contract coinflip is VRFConsumerBase {
         fee = 0.0001 * 10 ** 18; // 0.1 LINK (Varies by network)
         owner = payable(msg.sender);
     }
-
-    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-        randomResult = (randomness % 100) + 1;
-        require(randomResult <= 100 && randomResult >= 1);
-        if (randomResult > 50) {
-            player.transfer(bet);
-            player.transfer(bet);
-            emit Roll(player, bet, true);
-        }
-        else {
-            emit Roll(player, bet, false);
-        }
-        
-    }
-
     
     function deposit() public payable {
         emit Deposit(msg.sender, msg.value);
@@ -54,11 +40,25 @@ contract coinflip is VRFConsumerBase {
     }
 
     function roll() public payable returns(bytes32 requestId) {
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK");
         player = payable(msg.sender);
         bet = msg.value;
+        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK");
+        require(bet >= minimumBet, "Bet must be at least 1000000000000000 wei");
         requestId = requestRandomness(keyHash, fee);
         return requestId;
+    }
+    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+        randomResult = (randomness % 100) + 1;
+        require(randomResult <= 100 && randomResult >= 1);
+        if (randomResult > 50) {
+            player.transfer(bet);
+            player.transfer(bet);
+            emit Roll(player, bet, true);
+        }
+        else {
+            emit Roll(player, bet, false);
+        }
+        
     }
 }
 

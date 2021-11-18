@@ -1,32 +1,17 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
-
-contract coinflip is VRFConsumerBase {
+contract test {
     
-    bytes32 internal keyHash;
     uint256 internal fee;
     address payable owner;
-    uint256 public randomResult;
+    bytes32 public randomness;
+    uint public random;
     uint public bet;
     uint public minimumBet = 1000000000000000;
     address payable public player;
     event Roll(address indexed, uint indexed, bool indexed);
     event Deposit(address indexed, uint indexed);
     event Withdraw(address indexed, uint indexed);
-    
-    constructor() 
-        VRFConsumerBase(
-            0x3d2341ADb2D31f1c5530cDC622016af293177AE0, // VRF Coordinator
-            0xb0897686c545045aFc77CF20eC7A532E3120E0F1  // LINK Token
-        )
-    
-    {
-        keyHash = 0xf86195cf7690c55907b2b611ebb7343a6f649bff128701cc542f0569e2c549da;
-        fee = 0.0001 * 10 ** 18;
-        owner = payable(msg.sender);
-    }
     
     function deposit() public payable {
         emit Deposit(msg.sender, msg.value);
@@ -39,18 +24,13 @@ contract coinflip is VRFConsumerBase {
         emit Withdraw(msg.sender, amount);
     }
 
-    function roll() public payable returns(bytes32 requestId) {
+    function roll() public payable {
         player = payable(msg.sender);
         bet = msg.value;
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK");
         require(bet >= minimumBet, "Bet must be at least 1000000000000000 wei");
-        requestId = requestRandomness(keyHash, fee);
-        return requestId;
-    }
-    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-        randomResult = (randomness % 100) + 1;
-        require(randomResult <= 100 && randomResult >= 1);
-        if (randomResult > 50) {
+        randomness = vrf();
+        random = asciiToInteger(randomness);
+        if (random % 2 == 0) {
             player.transfer(bet);
             player.transfer(bet);
             emit Roll(player, bet, true);
@@ -58,7 +38,31 @@ contract coinflip is VRFConsumerBase {
         else {
             emit Roll(player, bet, false);
         }
-        
     }
+    function asciiToInteger(bytes32 x) public pure returns (uint256) {
+    uint256 y;
+    for (uint256 i = 0; i < 32; i++) {
+        uint256 c = (uint256(x) >> (i * 8)) & 0xff;
+        if (48 <= c && c <= 57)
+            y += (c - 48) * 10 ** i;
+        else if (65 <= c && c <= 90)
+            y += (c - 65 + 10) * 10 ** i;
+        else if (97 <= c && c <= 122)
+            y += (c - 97 + 10) * 10 ** i;
+        else
+            break;
+    }
+    return y;
 }
-
+    function vrf() public view returns (bytes32 result) {
+    uint[1] memory bn;
+    bn[0] = block.number;
+    assembly {
+      let memPtr := mload(0x40)
+      if iszero(staticcall(not(0), 0xff, bn, 0x20, memPtr, 0x20)) {
+        invalid()
+      }
+      result := mload(memPtr)
+    }
+  }    
+}

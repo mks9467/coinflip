@@ -1,3 +1,3 @@
 # coinflip
 
-Coinflip implementation in solidity for erc20 tokens
+A simple contract to gamble with an erc20 token

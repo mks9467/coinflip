@@ -1,7 +1,7 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-contract test {
-    
+contract tokenflip {
     uint256 internal fee;
     address payable owner;
     uint public random;

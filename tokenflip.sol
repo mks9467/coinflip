@@ -1,59 +1,51 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.10;
 
-contract tokenflip {
-    uint256 internal fee;
-    address payable owner;
-    uint public random;
-    uint public bet;
-    uint public minimumBet = 1;
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+contract tokenflip is Ownable{
+    IERC20 public _token;
     uint public winnings;
-    address payable public player;
+    address public player;
     event Roll(address indexed, uint indexed, bool indexed);
     event Deposit(address indexed, uint indexed);
     event Withdraw(address indexed, uint indexed);
     
-    constructor() {
-        owner = payable(msg.sender);
+    constructor(IERC20 roy) {
+        _token = roy;
     }
     
-    function deposit() public payable {
-        emit Deposit(msg.sender, msg.value);
+    function deposit(uint256 amount) public payable {
+        _token.transferFrom(msg.sender, address(this), amount);
+        emit Deposit(msg.sender, amount);
     }
     
-    function withdraw(uint amount) public payable {
-        require(msg.sender == owner);
-        require(amount <= address(this).balance);
-        owner.transfer(amount);
+    function withdraw(uint256 amount) public onlyOwner {
+        require(amount <= _token.balanceOf(address(this)));
+        _token.transfer(msg.sender, amount);
         emit Withdraw(msg.sender, amount);
     }
 
-    function roll() public payable {
-        player = payable(msg.sender);
-        bet = msg.value;
-        require(bet >= minimumBet, "Bet must be at least 1 wei");
-        random = convert(vrf());
-        if (random % 2 == 0) {
+    function roll(uint256 bet) public returns(bool) {
+        player = msg.sender;
+        _token.transferFrom(player, address(this), bet);
+        require(bet < _token.balanceOf(msg.sender));
+        if (random() % 2 == 0) {
             winnings = bet + bet;
-            player.transfer(winnings);
+            _token.transfer(player, winnings);
             emit Roll(player, bet, true);
+            return true;
         }
         else {
             emit Roll(player, bet, false);
+            return false;
         }
     }   
-    function convert(bytes32 b) public pure returns(uint) {
-        return uint(b);
+    function balance() public view returns(uint) {
+        return _token.balanceOf(address(this));
     }
-    function vrf() public view returns (bytes32 result) {
-        uint[1] memory bn;
-        bn[0] = block.number;
-        assembly {
-        let memPtr := mload(0x40)
-        if iszero(staticcall(not(0), 0xff, bn, 0x20, memPtr, 0x20)) {
-            invalid()
-        }
-        result := mload(memPtr)
-        }
-    }
+    function random() public view returns (uint) {
+        return uint(keccak256(abi.encode(block.difficulty, block.timestamp)));
+    } 
 }

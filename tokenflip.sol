@@ -12,8 +12,8 @@ contract tokenflip is Ownable{
     event Deposit(address indexed, uint indexed);
     event Withdraw(address indexed, uint indexed);
     
-    constructor(IERC20 roy) {
-        _token = roy;
+    constructor(IERC20 token) {
+        _token = token;
     }
     
     function deposit(uint256 amount) public payable {

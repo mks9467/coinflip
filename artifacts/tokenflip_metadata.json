@@ -9,7 +9,7 @@
 				"inputs": [
 					{
 						"internalType": "contract IERC20",
-						"name": "roy",
+						"name": "token",
 						"type": "address"
 					}
 				],
@@ -304,11 +304,11 @@
 			]
 		},
 		"tokenflip.sol": {
-			"keccak256": "0xf7481b6662ac5ea50c52039f4266081d18e4d8ce6fad6e4cf25437c1f2c2b653",
+			"keccak256": "0xc72dee404ce2a3265e507bfeb954ad8448e5b8ba0c5a8ca10b10f2055a80b465",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://4492f689b9bec05cbfaa5e2062e74c002687a0e407fd1128354ede19c610a27f",
-				"dweb:/ipfs/QmVGW8QSoq2VvPGiUqcYN9f9NyFfGndgqCVtFJE9i6bSDX"
+				"bzz-raw://ed156683646038945f2c987cdaf4f7cf6b26dcd621d705668f3fe4e83163dfb8",
+				"dweb:/ipfs/QmZeiUL8pxbQEN73RmxHjSW2UdGFjAcxC2SUwXbU9xHWFZ"
 			]
 		}
 	},

@@ -273,7 +273,7 @@
 			"bytecodeHash": "ipfs"
 		},
 		"optimizer": {
-			"enabled": true,
+			"enabled": false,
 			"runs": 200
 		},
 		"remappings": []
@@ -303,12 +303,20 @@
 				"dweb:/ipfs/QmRK2Y5Yc6BK7tGKkgsgn3aJEQGi5aakeSPZvS65PV8Xp3"
 			]
 		},
-		"tokenflip.sol": {
-			"keccak256": "0xc72dee404ce2a3265e507bfeb954ad8448e5b8ba0c5a8ca10b10f2055a80b465",
+		"@openzeppelin/contracts/utils/math/SafeMath.sol": {
+			"keccak256": "0xa2f576be637946f767aa56601c26d717f48a0aff44f82e46f13807eea1009a21",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://ed156683646038945f2c987cdaf4f7cf6b26dcd621d705668f3fe4e83163dfb8",
-				"dweb:/ipfs/QmZeiUL8pxbQEN73RmxHjSW2UdGFjAcxC2SUwXbU9xHWFZ"
+				"bzz-raw://973868f808e88e21a1a0a01d4839314515ee337ad096286c88e41b74dcc11fc2",
+				"dweb:/ipfs/QmfYuZxRfx2J2xdk4EXN7jKg4bUYEMTaYk9BAw9Bqn4o2Y"
+			]
+		},
+		"tokenflip.sol": {
+			"keccak256": "0x16ae98419087db84eb29cb9b111a4ab69ab8ec71dba3812971d4ae040d02168f",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://54034945c43f76fb6c36b781a56c56e7045d96d3977037eb1aca9b53779e9581",
+				"dweb:/ipfs/QmewfZB2XgJsj1tkSHsb5i3BWmRqMFnryxbx6cFMxzdRGT"
 			]
 		}
 	},
